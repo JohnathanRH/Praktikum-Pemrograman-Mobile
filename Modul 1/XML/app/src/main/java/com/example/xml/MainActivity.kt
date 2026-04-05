@@ -35,25 +35,8 @@ class MainActivity : AppCompatActivity() {
         val result = (1..6).random()
         val result2 = (1..6).random()
 
-        val imageResource = when(result)
-        {
-            1 -> R.drawable.dice_1
-            2 -> R.drawable.dice_2
-            3 -> R.drawable.dice_3
-            4 -> R.drawable.dice_4
-            5 -> R.drawable.dice_5
-            else -> R.drawable.dice_6
-        }
-
-        val imageResource2 = when(result2)
-        {
-            1 -> R.drawable.dice_1
-            2 -> R.drawable.dice_2
-            3 -> R.drawable.dice_3
-            4 -> R.drawable.dice_4
-            5 -> R.drawable.dice_5
-            else -> R.drawable.dice_6
-        }
+        val imageResource = getDiceDrawable(result)
+        val imageResource2 = getDiceDrawable(result2)
 
         imgView.setImageResource(imageResource)
         imgView2.setImageResource(imageResource2)
@@ -65,11 +48,26 @@ class MainActivity : AppCompatActivity() {
         val rootLayout : LinearLayout = findViewById(R.id.rootLayout)
         if (isDouble)
         {
-            Snackbar.make(rootLayout, "Selamat, anda dapat double!", Snackbar.LENGTH_SHORT).show()
+            Snackbar.make(rootLayout, "Selamat, anda dapat dadu double!", Snackbar.LENGTH_SHORT).show()
         }
         else
         {
-            Snackbar.make(rootLayout, "Kurang beruntung", Snackbar.LENGTH_SHORT).show()
+            Snackbar.make(rootLayout, "Anda belum beruntung!", Snackbar.LENGTH_SHORT).show()
         }
+    }
+
+    fun getDiceDrawable(result : Int) : Int
+    {
+        var resource = when(result)
+        {
+            1 -> R.drawable.dice_1
+            2 -> R.drawable.dice_2
+            3 -> R.drawable.dice_3
+            4 -> R.drawable.dice_4
+            5 -> R.drawable.dice_5
+            else -> R.drawable.dice_6
+        }
+
+        return resource
     }
 }
