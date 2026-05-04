@@ -8,16 +8,23 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.Percent
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -40,10 +47,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tipcalculator.ui.theme.TipCalculatorTheme
@@ -63,57 +75,87 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun App() {
-    var bill : Float? by remember { mutableStateOf(0f) }
-    var rate by remember { mutableStateOf(0f) }
-    var result by remember { mutableFloatStateOf(0f) }
-    var wantsRound by remember { mutableStateOf(false) }
-
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(all = 25.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
+            .fillMaxWidth()
+            .fillMaxHeight()
+            .padding(25.dp)
     ) {
-        BillField(
-            bill = bill,
-            onValueChanged = {
-                bill = it.toFloatOrNull()
-                result = bill?.times(rate) ?: 0f
-                if (wantsRound){ result = result.roundToInt().toFloat() }
+        Row() {
+            Image(
+                modifier = Modifier
+                    .padding(end = 15.dp)
+                    .size(100.dp),
+                painter = painterResource(R.drawable.man),
+                contentDescription = "Man icon"
+            )
+            Column() {
+                Text(
+                    text = "Title",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 25.sp
+                )
+                Text(
+                    text = "Sub-Title",
+                    fontSize = 20.sp
+                )
+                Row(
+                    modifier = Modifier.padding(top = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    Image(
+                        modifier = Modifier
+                            .padding(end = 15.dp)
+                            .size(25.dp),
+                        painter = painterResource(R.drawable.star_2_),
+                        contentDescription = "Star icon"
+                    )
+                    Text("9.23")
+                }
             }
-        )
-        TipRateDropdown(
-            options = arrayOf(
-                0.15f,
-                0.18f,
-                0.2f
-            ),
-            onOptionSelected = {
-                rate = it
-                result = bill?.times(rate) ?: 0f
-                if (wantsRound){ result = result.roundToInt().toFloat() }
-            }
+        }
+
+        Text(
+            textAlign = TextAlign.Justify,
+            modifier = Modifier.padding(top = 15.dp),
+            text = stringResource(R.string.lorem)
         )
 
         Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 25.dp)
+                .padding(top = 15.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("Round up tip?")
-            Switch(
-                checked = wantsRound,
-                onCheckedChange = { wantsRound = !wantsRound }
-            )
-        }
+            Button(
+                onClick = {},
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Blue
+                )
+            ) {
+                Text("Like")
+            }
 
-        Row(){
-            Text(
-                text = "Tip Amount: $$result",
-                fontWeight = FontWeight.Bold,
-                fontSize = 30.sp
-            )
+            Button(
+                onClick = {},
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Red
+                )
+            ) {
+                Text("Dislike")
+            }
+
+            Button(
+                onClick = {},
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Green
+                )
+            ) {
+                Text("Share")
+            }
         }
     }
 }
@@ -123,61 +165,5 @@ fun App() {
 fun GreetingPreview() {
     TipCalculatorTheme {
         App()
-    }
-}
-
-@Composable
-fun BillField(bill : Float?, onValueChanged : (String) -> Unit)
-{
-    TextField(
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-        value = bill?.toString() ?: "",
-        onValueChange = onValueChanged,
-        label = { Text("Jumlah bill") },
-        leadingIcon = { Icon(Icons.Default.Payments, contentDescription = "Icon") },
-        colors = TextFieldDefaults.colors(
-
-        )
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TipRateDropdown(options : Array<Float>, onOptionSelected : (Float) -> Unit)
-{
-    var opened by remember { mutableStateOf(false) }
-    var txt by remember { mutableStateOf("") }
-
-    ExposedDropdownMenuBox(
-        modifier = Modifier.padding(top = 25.dp),
-        expanded = opened,
-        onExpandedChange = { opened = !opened }
-    ) {
-        TextField(
-            value = txt,
-            onValueChange = {},
-            readOnly = true,
-            label = { Text("Tip Percentage") },
-            leadingIcon = { Icon(Icons.Filled.Percent, contentDescription = "IconToo") },
-            modifier = Modifier.menuAnchor(type = MenuAnchorType.PrimaryEditable, enabled = true)
-        )
-
-        ExposedDropdownMenu(
-            expanded = opened,
-            onDismissRequest = { opened = false }
-        ) {
-            options.forEach {
-                val theText : String = (it * 100).roundToInt().toString()
-
-                DropdownMenuItem(
-                    text = { Text("$theText%") },
-                    onClick = {
-                        txt = "$theText%"
-                        onOptionSelected(it)
-                        opened = false
-                    }
-                )
-            }
-        }
     }
 }
