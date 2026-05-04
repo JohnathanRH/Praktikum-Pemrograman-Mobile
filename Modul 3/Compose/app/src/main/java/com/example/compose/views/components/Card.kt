@@ -3,20 +3,29 @@ package com.example.compose.views.components
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -30,6 +39,8 @@ import com.example.compose.R
 import com.example.compose.Routes
 import com.example.compose.models.CardData
 import androidx.core.net.toUri
+import androidx.navigation.NavController
+import com.example.compose.DummyData
 
 @Composable
 fun Card(cardData : CardData, navController : NavHostController)
@@ -43,16 +54,28 @@ fun Card(cardData : CardData, navController : NavHostController)
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .height(200.dp)
+            .background(
+                color = colorResource(R.color.Gray),
+                shape = RoundedCornerShape(10.dp)
+            )
     ){
         Column() {
             Row() {
                 Image(
                     painter = painterResource(id = cardData.imgResource),
                     contentDescription = "Product Image",
-                    modifier = Modifier.padding(all = 15.dp)
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .padding(all = 15.dp)
+                        .fillMaxHeight()
+                        .width(100.dp)
+                        .clip(RoundedCornerShape(16.dp))
                 )
+
                 Column(
-                    modifier = Modifier.fillMaxHeight()
+                    modifier = Modifier
+                        .fillMaxHeight()
                 ) {
                     Text(
                         fontSize = 25.sp,
@@ -97,11 +120,15 @@ fun Card(cardData : CardData, navController : NavHostController)
 @Composable
 fun Test()
 {
-    val cardData = CardData(
-        imgResource = R.drawable.ic_launcher_background,
-        titleResource = R.string.title_stronghold,
-        descResource = R.string.desc_stronghold,
-        wikiUri = "https://tdx.fandom.com/wiki/Tower_Defense_X_Wiki"
-    )
-    Card(cardData, rememberNavController())
+    val items : List<CardData> = DummyData.Card.items
+
+    LazyColumn() {
+        items(items){ cardData ->
+            Card(
+                cardData = cardData,
+                navController = rememberNavController()
+            )
+            Spacer(Modifier.padding(bottom = 10.dp))
+        }
+    }
 }
