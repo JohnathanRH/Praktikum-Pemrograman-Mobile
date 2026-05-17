@@ -62,31 +62,23 @@ fun Card(cardData : CardData, navController : NavHostController)
     ){
         Column() {
             Row() {
-                Image(
-                    painter = painterResource(id = cardData.imgResource),
-                    contentDescription = "Product Image",
-                    contentScale = ContentScale.Crop,
+                ProductImage(
+                    imgResId = cardData.imgResource,
                     modifier = Modifier
                         .padding(all = 15.dp)
                         .fillMaxHeight()
                         .width(100.dp)
-                        .clip(RoundedCornerShape(16.dp))
                 )
 
                 Column(
                     modifier = Modifier
                         .fillMaxHeight()
                 ) {
-                    Text(
-                        fontSize = 25.sp,
-                        fontWeight = FontWeight.Bold,
+                    Title(
                         text = title,
                         modifier = Modifier.padding(bottom = 3.dp)
                     )
-                    Text(
-                        textAlign = TextAlign.Justify,
-                        text = description,
-                    )
+                    Description(text = description)
 
                     Row(
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -104,7 +96,11 @@ fun Card(cardData : CardData, navController : NavHostController)
 
                         Button(
                             onClick = {
-                                navController.navigate(Routes.ItemDetail.path)
+                                val route = Routes.ItemDetail.createPath(cardId = cardData.id ?: 0)
+
+                                navController.navigate(
+                                    route = route
+                                )
                             }
                         ){
                             Text("Detail")
