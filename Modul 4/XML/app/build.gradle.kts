@@ -33,9 +33,15 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
+    buildFeatures {
+        dataBinding = true
+        buildConfig = true
+    }
 }
 
 dependencies {
+    implementation("com.jakewharton.timber:timber:5.0.1")
     implementation(libs.androidx.fragment)
     implementation(libs.androidx.ui)
     val fragment_version = "1.8.9"

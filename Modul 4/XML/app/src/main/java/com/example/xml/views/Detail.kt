@@ -1,52 +1,54 @@
 package com.example.xml.views
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.TextView
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.xml.MainActivity
 import com.example.xml.R
-import com.google.android.material.imageview.ShapeableImageView
+import com.example.xml.databinding.DetailBinding
+import com.example.xml.viewmodels.GameViewModel
+import com.example.xml.viewmodels.NavigationEvent
+import kotlinx.coroutines.launch
 
 class Detail : Fragment(R.layout.detail) {
+
+    private val mainViewModel: GameViewModel by activityViewModels()
+    private lateinit var binding: DetailBinding
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding = DetailBinding.bind(view)
+        binding.viewModel = mainViewModel
+        binding.lifecycleOwner = viewLifecycleOwner
 
-        val title: TextView = view.findViewById(R.id.titleTextView)
-        val productImg: ShapeableImageView = view.findViewById(R.id.productImg)
-        val desc: TextView = view.findViewById(R.id.descTextView)
-        val wikiBtn: Button = view.findViewById(R.id.wikiBtn)
-        val homeBtn: Button = view.findViewById(R.id.homeBtn)
+        binding.wikiUrl = arguments?.getString("wikiUri") ?: ""
 
-        val imgDrawable = view.context.getDrawable(arguments?.getInt("imgResource") ?: 0)
-        val wikiUri: Uri = arguments?.getString("wikiUri")?.toUri() ?: "".toUri()
+        val context = requireContext()
+        binding.productImg.setImageDrawable(context.getDrawable(arguments?.getInt("imgResource") ?: 0))
+        binding.titleTextView.text = getString(arguments?.getInt("titleResource") ?: 0)
+        binding.descTextView.text = getString(arguments?.getInt("descResource") ?: 0)
 
-        productImg.setImageDrawable(imgDrawable)
-        title.text = getString(arguments?.getInt("titleResource") ?: 0)
-        desc.text = getString(arguments?.getInt("descResource") ?: 0)
-
-        wikiBtn.setOnClickListener {
-            val intent : Intent = Intent(
-                Intent.ACTION_VIEW,
-                wikiUri
-            )
-            view.context.startActivity(intent)
-        }
-
-        homeBtn.setOnClickListener {
-            val activity = context as? MainActivity
-            val homeFragment = Home()
-
-            activity?.supportFragmentManager?.beginTransaction()?.apply {
-                replace(R.id.fragmentContainerView, homeFragment)
-                addToBackStack(null)
-                commit()
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                mainViewModel.navigationEvent.collect { event ->
+                    when (event) {
+                        is NavigationEvent.OpenWiki -> {
+                            val intent = Intent(Intent.ACTION_VIEW, event.url.toUri())
+                            context.startActivity(intent)
+                        }
+                        is NavigationEvent.NavigateToHome -> {
+                            (activity as? MainActivity)?.supportFragmentManager?.popBackStack()
+                        }
+                        else -> {}
+                    }
+                }
             }
         }
-
     }
 }

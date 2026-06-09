@@ -1,35 +1,41 @@
 package com.example.xml.views
 
-import android.app.Activity
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import androidx.fragment.app.Fragment
-import com.example.xml.LanguageManager
-import com.example.xml.MainActivity
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.xml.R
+import com.example.xml.databinding.SettingBinding
+import com.example.xml.viewmodels.GameViewModel
+import com.example.xml.viewmodels.NavigationEvent
+import kotlinx.coroutines.launch
 
 class Setting : Fragment(R.layout.setting) {
+
+    private val mainViewModel: GameViewModel by activityViewModels()
+    private lateinit var binding: SettingBinding
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding = SettingBinding.bind(view)
+        binding.viewModel = mainViewModel
+        binding.lifecycleOwner = viewLifecycleOwner
 
-        val englishBtn : Button = view.findViewById(R.id.englishBtn)
-        val spanishBtn : Button = view.findViewById(R.id.spansihBtn)
-
-        englishBtn.setOnClickListener {
-            AppCompatDelegate.setApplicationLocales(
-                LocaleListCompat.forLanguageTags("en")
-            )
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                mainViewModel.navigationEvent.collect { event ->
+                    if (event is NavigationEvent.ChangeLanguage) {
+                        AppCompatDelegate.setApplicationLocales(
+                            LocaleListCompat.forLanguageTags(event.languageTag)
+                        )
+                    }
+                }
+            }
         }
-        spanishBtn.setOnClickListener {
-            AppCompatDelegate.setApplicationLocales(
-                LocaleListCompat.forLanguageTags("es")
-            )
-        }
-
     }
 }

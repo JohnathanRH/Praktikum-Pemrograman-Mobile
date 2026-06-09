@@ -1,40 +1,44 @@
 package com.example.xml
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.net.toUri
-import androidx.fragment.app.commit
 import androidx.recyclerview.widget.RecyclerView
 import com.example.xml.models.Game
 import com.example.xml.views.components.CardViewHolder
 import com.example.xml.views.Detail
+import timber.log.Timber
 
-class RecyclerViewAdapter(private val games: List<Game>) :
+class RecyclerViewAdapter(private var games: List<Game>) :
     RecyclerView.Adapter<CardViewHolder>(){
 
-    // Create new views (invoked by the layout manager)
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): CardViewHolder {
-        // Create a new view, which defines the UI of the list item
         val view = LayoutInflater.from(viewGroup.context)
             .inflate(R.layout.card, viewGroup, false)
-
         return CardViewHolder(view)
     }
 
-    override fun onBindViewHolder(
-        viewHolder: CardViewHolder, position: Int
-    ) {
-        // Get element from your dataset at this position and replace the
-        // contents of the view with that element
+    override fun onBindViewHolder(viewHolder: CardViewHolder, position: Int) {
         val game = games[position]
-
         setupCardContents(viewHolder, game)
     }
 
     override fun getItemCount() = games.size
+
+    fun updateGames(newGames: List<Game>) {
+        this.games = newGames
+        notifyDataSetChanged()
+
+        for (game in newGames) {
+            Timber.d(
+                "Game added to RecyclerView: ID=%d, TitleRes=%d",
+                game.id,
+                game.titleResource
+            )
+        }
+    }
 
     fun setupCardContents(viewHolder: CardViewHolder, game : Game){
         val context = viewHolder.itemView.context
@@ -44,22 +48,31 @@ class RecyclerViewAdapter(private val games: List<Game>) :
         viewHolder.productImg.setImageDrawable(context.getDrawable(game.imgResource))
 
         viewHolder.wikiBtn.setOnClickListener {
-            val intent : Intent = Intent(
-                Intent.ACTION_VIEW,
-                game.wikiUri.toUri()
-                )
+            Timber.i(
+                "Wiki button pressed for Game: %d",
+                game.id
+            )
+            val intent = Intent(Intent.ACTION_VIEW, game.wikiUri.toUri())
             context.startActivity(intent)
         }
 
         viewHolder.detailBtn.setOnClickListener {
+            Timber.i("Details button pressed.")
+            Timber.d(
+                "Game -> ID: %d, TitleRes: %d, WikiURL: %s",
+                game.id,
+                game.titleResource,
+                game.wikiUri
+            )
             val activity = context as? MainActivity
             val detailFragment = Detail()
 
-            val bundle : Bundle = Bundle()
-            bundle.putInt("titleResource", game.titleResource)
-            bundle.putInt("descResource", game.descResource)
-            bundle.putInt("imgResource", game.imgResource)
-            bundle.putString("wikiUri", game.wikiUri)
+            val bundle = Bundle().apply {
+                putInt("titleResource", game.titleResource)
+                putInt("descResource", game.descResource)
+                putInt("imgResource", game.imgResource)
+                putString("wikiUri", game.wikiUri)
+            }
             detailFragment.arguments = bundle
 
             activity?.supportFragmentManager?.beginTransaction()?.apply {
